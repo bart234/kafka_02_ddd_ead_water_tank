@@ -11,8 +11,14 @@ add db: to save tank water level
 add more tanks
 
 
+stage 5:
+add kafka betweeen, add flask server ad small api to send msg
+add some test
 
-TODO:stage 4:
+adjust all to use kafka 
+run all on kafka container 
+
+stage 4:
 add flask, add api :
   create tank id-name-capacity
   check tank status (on/off)
@@ -20,11 +26,6 @@ add flask, add api :
   open  water flow ( water should increase)
   close water flow (water flow stop)
   set auto-open, set auto-close
-  
-
-add kafka betweeen, add flask server ad small api to send msg
-adjust all to use kafka 
-run all on kafka container 
 
 stage 3:
 logger_decorator done

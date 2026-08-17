@@ -1,36 +1,25 @@
 from fastapi import FastAPI,HTTPException
-from pydantic import BaseModel
+
 import uuid
+from app.models_data_structures.water_structure import *
 
 app = FastAPI()
 
+# orgins = [
+#     "http://localhost:3000"
+# ]
+
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=orgins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"]
+# )
+
+
 temp_db = {}
 features_for_tanks={}
-
-class WaterTankCreation(BaseModel):
-    name:str
-    capacity:int
-    owner:str
-
-class WaterTankFeatures(BaseModel):
-    tank_id:str
-    autofill:bool =False
-    sms_service: bool =False
-    logger:bool =False
-
-
-class WaterTank(WaterTankCreation):
-    id:str
-    status:int =0
-    valve_status:int = 0
-
-class WaterTankStatusReturn(BaseModel):
-    id:str
-    status:int
-
-class WaterTankWaterLevelReturn(BaseModel):
-    id:str
-    water_level:int
 
 
 t1= WaterTank(id='22',name='t1',capacity=10,owner='bob',status=0)
@@ -38,24 +27,24 @@ temp_db['22']=t1
 features_for_tanks['22']=WaterTankFeatures(tank_id='22')
 
 
-@app.get("/tank/showalltanks",response_model=list[WaterTankFeatures])
+@app.get("/tank/showallfutures",response_model=list[WaterTankFeatures])
 def post_show_all_water_containers_features():
     return features_for_tanks.values()
 
-@app.get("/tank/showallfutures",response_model=list[WaterTank])
+@app.get("/tank/showalltanks",response_model=list[WaterTank])
 def post_show_all_water_containers():
     return temp_db.values()
 
 @app.post("/tank/create",response_model=WaterTank)
 def create_tank(watertank_creation:WaterTankCreation):
-    a =WaterTank(id=str(uuid.uuid4())[0:2],
+    new_tank =WaterTank(id=str(uuid.uuid4())[0:2],
                  name=watertank_creation.name,
                  capacity=watertank_creation.capacity,
                  owner=watertank_creation.owner
                  )
-    features_for_tanks[a.id]=WaterTankFeatures(tank_id=a.id)
-    temp_db[a.id]=a
-    return a
+    features_for_tanks[new_tank.id]=WaterTankFeatures(tank_id=new_tank.id)
+    temp_db[new_tank.id]=new_tank
+    return new_tank
 
 
 @app.post("/tank/{tank_id}/check_status",response_model=WaterTankStatusReturn)
@@ -97,4 +86,14 @@ def get_feature_turnOff_turnOn(tank_id:str,feature_name:str):
     else:
         raise HTTPException(status_code=400, detail=f"Tank: {tank_id} do not exist")
 
+@app.post("/tank/{tank_id}/check/{feature_name}",response_model=WaterTankOneFeatureStatus)
+def get_feature_value_check(tank_id:str,feature_name:str):  
+    if str(tank_id) in features_for_tanks.keys(): 
+        tank_features =  features_for_tanks[tank_id]
+        if hasattr(tank_features,feature_name):
+            return WaterTankOneFeatureStatus(feature_name=feature_name,feature_status=getattr(tank_features,feature_name))
+        else:     
+            raise HTTPException(status_code=400, detail=f"Feature: {feature_name} do not exist")
+    else:
+        raise HTTPException(status_code=400, detail=f"Tank: {tank_id} do not exist")
     
