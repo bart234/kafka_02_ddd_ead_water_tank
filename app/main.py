@@ -2,6 +2,8 @@ from fastapi import FastAPI,HTTPException
 import uuid
 from app.models_data_structures.water_structure import *
 from app.models_data_base_structures.db_water_structure import *
+from app.mappers.map_water_tanks_structures import Mapper_WaterTanks
+from app.db_access_layer.db_mid_layer import SQLAlchemyRepository
 from sqlalchemy.orm import sessionmaker
 from app.db_cfg import engine
 
@@ -50,7 +52,11 @@ def create_tank(watertank_creation:WaterTankCreation):
                  owner=watertank_creation.owner
                  )
     features_for_tanks[new_tank.tank_tag]=WaterTankFeatures(tank_tag=new_tank.tank_tag)
+    db_wt = Mapper_WaterTanks.dta_to_db(new_tank)
+    db = SQLAlchemyRepository(session)
+    db.add(db_wt)
     temp_db[new_tank.tank_tag]=new_tank
+    
     return new_tank
 
 # @app.post("/tank/create2",response_model=WaterTank)
