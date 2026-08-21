@@ -1,5 +1,6 @@
 
-from app.main import app,WaterTankFeatures
+from app.main import app
+from app.models_data_structures.water_structure import WaterTankFeatures
 
 # client = TestClient(app)
 #run from level above app : python -m pytest app/tests/test_api.py

@@ -24,7 +24,10 @@ class SQLAlchemyRepository[T](ABC):
         return result    
 
     def get_specific_attr(self,tank_tag:str,attr_name: str):
-        return getattr(self.get(tank_tag),attr_name)  
+        try:
+            return getattr(self.get(tank_tag),attr_name)  
+        except:
+            return None
 
     def select_all(self)->list[T]:
         query = select(self.model)
@@ -52,10 +55,10 @@ class SQLAlchemyRepository[T](ABC):
         self.session.commit()
         return result.rowcount > 0
 
-class WaterTankRepository(SQLAlchemyRepository[db_WaterTanks]):
+class RepositoryWaterTank(SQLAlchemyRepository[db_WaterTanks]):
     def __init__(self, session):
         super().__init__(session, db_WaterTanks)
  
-class WaterTankFeaturesRepository(SQLAlchemyRepository[db_TanksFeatures]):
+class RepositoryWaterTankFeatures(SQLAlchemyRepository[db_TanksFeatures]):
     def __init__(self, session):
         super().__init__(session, db_TanksFeatures)
