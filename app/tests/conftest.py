@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from app.models_data_base_structures.db_water_structure import Base
-from app.models_data_base_structures.db_water_structure import db_WaterTanks
+from app.models_data_base_structures.db_water_structure import db_WaterTanks,db_TanksFeatures
 from app.main import app
 import pytest
 from sqlalchemy.orm import sessionmaker,declarative_base
@@ -31,7 +31,7 @@ def db_test_session():
     yield session
     session.close()
 
-@pytest.fixture(autouse=True)
+@pytest.fixture()
 def add_dummy_wt_to_db(db_test_session):
     test_tank_id = 'test_tank_fixtures'
     tank = db_WaterTanks(tank_tag=test_tank_id,
@@ -59,4 +59,31 @@ def add_dummy_wt_to_db(db_test_session):
                     status=0,
                     valve_status=0)
     db_test_session.add(tank)
+    db_test_session.commit()
+
+
+@pytest.fixture()
+def add_dummy_wtf_to_db(db_test_session):
+    test_tank_id = 'test_tank_fixtures'
+    wtf = db_TanksFeatures(tank_tag=test_tank_id,
+                    autofill=0,
+                    sms_service=0,
+                    logger=0)
+    db_test_session.add(wtf)
+    db_test_session.commit()
+
+    test_tank_id = 'test_tank_fixtures_2nd'
+    wtf2 = db_TanksFeatures(tank_tag=test_tank_id,
+                    autofill=0,
+                    sms_service=0,
+                    logger=0)
+    db_test_session.add(wtf2)
+    db_test_session.commit()
+
+    test_tank_id = 'test_tank_fixtures_3rd'
+    wtf3 = db_TanksFeatures(tank_tag=test_tank_id,
+                    autofill=0,
+                    sms_service=0,
+                    logger=0)
+    db_test_session.add(wtf3)
     db_test_session.commit()

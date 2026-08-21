@@ -1,54 +1,61 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from abc import ABC
+from typing import TypeVar,Type,Optional
 from app.models_data_structures.water_structure import *
 from app.models_data_base_structures.db_water_structure import *
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine,select,update,delete
+from sqlalchemy.orm import Session
+from sqlalchemy import select,update,delete
 
-class DataABC(ABC):
-    @abstractmethod
-    def add(self)->dict[WaterTankFeatures]:
-        raise NotImplementedError
+T=TypeVar("T")
 
-class SQLAlchemyRepository(DataABC):
-    def __init__(self,session):
+class SQLAlchemyRepository[T](ABC):
+    def __init__(self,session: Session, model: Type[T]):
+        self.model = model
         self.session = session
 
-    def add(self,data:db_WaterTanks):
-        self.session.add(data)
+    def add(self,data:T) -> T:
+        new_data = data #object will be updated with id after save
+        self.session.add(new_data)
         self.session.commit()
+        return new_data
 
-    def get(self,tank_tag:str)->db_WaterTanks:
-        query = select(db_WaterTanks).where(db_WaterTanks.tank_tag==tank_tag)
+    def get(self,tank_tag:str)->Optional[T]:
+        query = select(self.model).where(getattr(self.model,'tank_tag')==tank_tag)
         result = self.session.scalar(query)
         return result    
 
     def get_specific_attr(self,tank_tag:str,attr_name: str):
-        return getattr(self.get(tank_tag),attr_name)    
+        return getattr(self.get(tank_tag),attr_name)  
 
-    #TODO: to remove - not in use in prod
-    def select_all(self)->list[db_WaterTanks]:
-        query = select(db_WaterTanks)
+    def select_all(self)->list[T]:
+        query = select(self.model)
         result = self.session.scalars(query)
         return result
 
     def update(self,tank_tag:str,attr_to_change: str,new_value)->bool:        
-        upd_query = update(db_WaterTanks).\
-                    where(db_WaterTanks.tank_tag==tank_tag).\
-                    values({getattr(db_WaterTanks,attr_to_change):new_value})
+        upd_query = update(self.model).\
+                    where(getattr(self.model,'tank_tag')==tank_tag).\
+                    values({getattr(self.model,attr_to_change):new_value})
         result = self.session.execute(upd_query)
         self.session.commit()
         return result.rowcount >0
 
-    def update_and_return(self,tank_tag:str,attr_to_change: str,new_value)->db_WaterTanks:
+    def update_and_return(self,tank_tag:str,attr_to_change: str,new_value)->Optional[T]:
         if self.update(tank_tag,attr_to_change,new_value) >0:
             return self.get(tank_tag)
         else:
             None
 
     def delete(self,tank_tag:str)->bool:        
-        del_query = delete(db_WaterTanks).\
-                    where(db_WaterTanks.tank_tag==tank_tag)
+        del_query = delete(self.model).\
+                    where(getattr(self.model,'tank_tag')==tank_tag)
         result = self.session.execute(del_query)
         self.session.commit()
         return result.rowcount > 0
+
+class WaterTankRepository(SQLAlchemyRepository[db_WaterTanks]):
+    def __init__(self, session):
+        super().__init__(session, db_WaterTanks)
+ 
+class WaterTankFeaturesRepository(SQLAlchemyRepository[db_TanksFeatures]):
+    def __init__(self, session):
+        super().__init__(session, db_TanksFeatures)

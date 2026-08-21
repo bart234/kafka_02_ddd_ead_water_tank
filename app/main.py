@@ -52,9 +52,9 @@ def create_tank(watertank_creation:WaterTankCreation):
                  owner=watertank_creation.owner
                  )
     features_for_tanks[new_tank.tank_tag]=WaterTankFeatures(tank_tag=new_tank.tank_tag)
-    db_wt = Mapper_WaterTanks.dta_to_db(new_tank)
-    db = SQLAlchemyRepository(session)
-    db.add(db_wt)
+    # db_wt = Mapper_WaterTanks.dta_to_db(new_tank)
+    # db = SQLAlchemyRepository(session)
+    # db.add(db_wt)
     temp_db[new_tank.tank_tag]=new_tank
     
     return new_tank
