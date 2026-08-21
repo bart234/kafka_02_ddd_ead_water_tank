@@ -1,7 +1,5 @@
 from app.models_data_base_structures.db_water_structure import db_WaterTanks,db_TanksFeatures
-
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine,select
+from sqlalchemy import select
 
 
 def test_water_tank_creation_save(db_test_session):

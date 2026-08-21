@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from app.models_data_base_structures.db_water_structure import Base
+from app.models_data_base_structures.db_water_structure import db_WaterTanks
 from app.main import app
 import pytest
 from sqlalchemy.orm import sessionmaker,declarative_base
@@ -29,3 +30,33 @@ def db_test_session():
     session=Session()
     yield session
     session.close()
+
+@pytest.fixture(autouse=True)
+def add_dummy_wt_to_db(db_test_session):
+    test_tank_id = 'test_tank_fixtures'
+    tank = db_WaterTanks(tank_tag=test_tank_id,
+                    name='my_test_tank',
+                    capacity=10,
+                    owner='admin',
+                    status=0,
+                    valve_status=0)
+    db_test_session.add(tank)
+    db_test_session.commit()
+    test_tank_id = 'test_tank_fixtures_2nd'
+    tank = db_WaterTanks(tank_tag=test_tank_id,
+                    name='my_test_tank_2nd',
+                    capacity=2234,
+                    owner='admin',
+                    status=0,
+                    valve_status=0)
+    db_test_session.add(tank)
+    db_test_session.commit()
+    test_tank_id = 'test_tank_fixtures_3rd'
+    tank = db_WaterTanks(tank_tag=test_tank_id,
+                    name='my_test_tank_2nd',
+                    capacity=2234,
+                    owner='admin',
+                    status=0,
+                    valve_status=0)
+    db_test_session.add(tank)
+    db_test_session.commit()
